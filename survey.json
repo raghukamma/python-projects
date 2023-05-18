@@ -1,0 +1,28 @@
+{
+  "name": "My Survey",
+  "description": "This is a sample survey.",
+  "questions": [
+    {
+      "id": "age",
+      "question": "What is your age?",
+      "answers": [
+        "Under 18",
+        "18-24",
+        "25-34",
+        "35-44",
+        "45-54",
+        "55-64",
+        "65 or over"
+      ]
+    },
+    {
+      "id": "gender",
+      "question": "What is your gender?",
+      "answers": ["Male", "Female", "Other"]
+    },
+    {
+      "id": "occupation",
+      "question": "What is your occupation?"
+    }
+  ]
+}
