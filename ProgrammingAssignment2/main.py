@@ -11,6 +11,8 @@ def process_fs(s_domain_func, s_var, limits):
 
     for variable, limit_values in limits.items():       # Substitute limit values into the numerator and denominator
         variable_symbol = Symbol(variable)
+        if not isinstance(limit_values, tuple):    # Handle both single numeric value and one-item tuple
+            limit_values = (limit_values,)
         for i, limit_value in enumerate(limit_values):
             num = num.subs(variable_symbol, limit_value)
             den = den.subs(variable_symbol, limit_value)
@@ -30,7 +32,7 @@ def test_func():
 
     # sp = 1 / (s * p1) # low pass
     # sp = s / (s * p1 + 1) # high pass
-    sp = (s / (s * p1 + 1)) * (s * z1 + 1) # band pass
+    # sp = (s / (s * p1 + 1)) * (s * z1 + 1) # band pass
     # sp = (s * p1 + 1) / (s * z1 + 1) # band stop
     # sp = ((s * p1 + 1) / (s * z1 + 1)) * ((s * z1 + 1) / (s * p1 + 1)) # all pass
     # sp = (s + 1) / ((s - 2)*(s + 3)*(s**2 + 2*s + 5)) # random transfer function to test the code
@@ -44,11 +46,11 @@ def test_func():
     # sp = (s + 1) / ((s - 2)*(s + 3)*(s**2 + 2*s + 5))
     # sp = (2 + 42*s)/((1 + 2*s)*(1 + 40*s))
 
-    # sp = (s + p1) / (s + p2)
+    sp = (s + p1) / (s + p2)
     
     # limits = {"p1": (1e3,)}
-    limits = {"p1": (1e3,), "z1": (1e2, 1e4)} # Second limit example 
-    # limits = {"p1": 1e3, "p2": (10e3,)} # limit example to show limits dictionary work with either single numeric value or a one item tuple
+    # limits = {"p1": (1e3,), "z1": (1e2, 1e4)} # Second limit example 
+    limits = {"p1": 1e3, "p2": (10e3,)} # limit example to show limits dictionary work with either single numeric value or a one item tuple
 
     process_fs(sp, s, limits)
 
