@@ -24,12 +24,11 @@ def process_fs(s_domain_func, s_var, limits):
             num = num.subs(variable_symbol, limit_value)
             den = den.subs(variable_symbol, limit_value)
 
-
     tf = TransferFunction(num, den, s_var)     # Create the TransferFunction object
     print(f"list of Poles in this Transfer function: {tf.poles()}")
     print(f"list of Zeros in this Transfer function: {tf.zeros()}")
-    bode_plot(tf)     # Generate the bode plot
-    pole_zero_plot(tf)     # Generate the pole-zero plot
+    bode_plot(tf, phase_unit='deg')     # Generate the bode plot
+    pole_zero_plot(tf, zero_color='red', show_axes=True)     # Generate the pole-zero plot
 
 def test_func():
     s = Symbol("s")
@@ -55,16 +54,14 @@ def test_func():
     # sp = (100 / (s + 30)) * exp(-0.01 * s) # time delay
     # sp = (s + 1) / ((s - 2)*(s + 3)*(s**2 + 2*s + 5))
     # sp = (2 + 42*s)/((1 + 2*s)*(1 + 40*s))
-
     # sp = (s + p1) / (s + p2)
-    
     # sp = (s + 1) / ((s - 2)*(s + 3)*(s**2 + 2*s + 5))
     # sp = (2 + 42*s)/((1 + 2*s)*(1 + 40*s))
     
     # limits = {"p1": (1e3,)}
     # limits = {"p1": (1e3,), "z1": (1e2, 1e4)} # Second limit example 
     # limits = {"p1": 1e3, "p2": (10e3,)} # limit example to show limits dictionary work with either single numeric value or a one item tuple
-
+    
     # limits = {"p1": 1e3}
     # limits = {"p1": (1e3, 1e4)}
     # limits = {"p1": (1e3, 5e3, 1e4)}
@@ -77,7 +74,7 @@ def test_func():
     # limits = {"p1": (1e3,), "p2": (10e3,), "z1": (1e2, 1e4), "z2": (1e3, 1e5)}
     sp = ((s + z1)*(s + z2)*(s + z3)) / ((s + p1)*(s + p2)*(s + p3))
     limits = {"p1": (1e3,), "p2": (10e3,), "p3": (100e3,), "z1": (1e2, 1e4), "z2": (1e3, 1e5), "z3": (1e4, 1e6)}
-    
+
     process_fs(sp, s, limits)
 
 if __name__ == "__main__":
