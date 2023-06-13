@@ -8,45 +8,24 @@ def process_fs(s_domain_func, s_var, limits):
     print(f"Using '{s_var}' and the following limits:")
     print(limits)
 
-    # for variable, limit_values in limits.items():       # Substitute limit values into the numerator and denominator
-    #     variable_symbol = Symbol(variable)
-    #     if not isinstance(limit_values, tuple):    # Handle both single numeric value and one-item tuple
-    #         limit_values = (limit_values,)
-    #     elif len(limit_values) == 1:   # If only one value is given, use it for all three limits.
-    #         limit_values = (limit_values[0], limit_values[0], limit_values[0]) # Handle different lengths of limit tuples
-    #     elif len(limit_values) == 2:    # If only two values are given, use the second value for the third limit.
-    #         limit_values = (limit_values[0], limit_values[1], limit_values[1])
-    #     elif len(limit_values) == 3:    # If three values are given, use them as is.
-    #         limit_values = (limit_values[0], limit_values[1], limit_values[2])
-
     s_var = s_var
-    num, den = s_domain_func.as_numer_denom()     # Extract the numerator and denominator from the symbolic expression
-        
-    symbols = s_domain_func.free_symbols
-    symbol_keys = []
+    num, den = s_domain_func.as_numer_denom()  # Extract the numerator and denominator from the symbolic expression
 
-   # Extract keys from limits dictionary that match the symbols used in the transfer function
-    for symbol in symbols:
-        for key, value in limits.items():
-            if str(symbol) == key:
-                symbol_keys.append(key)
-                break
+    symbol_keys = list(limits.keys())
+    symbol_limits = list(limits.values())
+
+    # Convert single numeric values to 1-item tuples
+    symbol_limits = [(value,) if isinstance(value, (int, float)) else value for value in symbol_limits]
 
     # Check if all symbols in the expression (except 's') have corresponding keys in the limits dictionary
-    missing_symbols = [str(symbol) for symbol in symbols if str(symbol) not in symbol_keys and str(symbol) != str(s_var)]
+    missing_symbols = [symbol for symbol in s_domain_func.free_symbols if str(symbol) not in symbol_keys and str(symbol) != str(s_var)]
     if missing_symbols:
-        raise ValueError(f"ARE YOU SURE YOU INCLUDED THE VARIABLE {missing_symbols} FROM TRANSFER FUNCTION IN THE LIMITS DICTIONARY?")
+        raise ValueError(f"ARE YOU SURE YOU INCLUDED LIMITS FOR THESE VARIABLES FROM TRANSFER FUNCTION IN THE LIMITS DICTIONARY: {missing_symbols}")
+    
+    # Generate combinations of symbol values in the correct order
+    combinations = list(itertools.product(*symbol_limits))
 
-    # Generate combinations of symbol values
-    symbol_limits = []
-    for key in symbol_keys:
-        value = limits[key]
-        if isinstance(value, (int, float)):
-            symbol_limits.append((value,))
-        else:
-            symbol_limits.append(value)
-
-    for symbol_values in itertools.product(*symbol_limits):
+    for symbol_values in combinations:
         num_new = num
         den_new = den
 
@@ -79,25 +58,25 @@ def generate_curve(num, den, s_var):
     step_response_plot(tf)
 
     # Calculate the settled response time
-    settled_time = None
-    cycles_to_show = 5
+    # settled_time = None
+    # cycles_to_show = 5
 
-    if time_domain_func.poles():
-        settling_time = 4 / max(time_domain_func.poles().real)
-        if settling_time < float('inf'):    #checking if settling time is finite. if it does not have any poles or settling time is infinite, assign None.
-            settled_time = settling_time
+    # if time_domain_func.poles():
+    #     settling_time = 4 / max(time_domain_func.poles().real)
+    #     if settling_time < float('inf'):    #checking if settling time is finite. if it does not have any poles or settling time is infinite, assign None.
+    #         settled_time = settling_time
 
-    if settled_time:
-        print(f"Settled response time: {settled_time} seconds")
-    else:
-        print("Response does not settle")
+    # if settled_time:
+    #     print(f"Settled response time: {settled_time} seconds")
+    # else:
+    #     print("Response does not settle")
 
-        # Show 5 cycles of the lowest oscillation frequency
-        if time_domain_func.zeros():
-            oscillation_time = 2 * 3.14159 / min(time_domain_func.zeros().imag)
-            cycles_to_show = min(cycles_to_show, int(oscillation_time))
+    #     # Show 5 cycles of the lowest oscillation frequency
+    #     if time_domain_func.zeros():
+    #         oscillation_time = 2 * 3.14159 / min(time_domain_func.zeros().imag)
+    #         cycles_to_show = min(cycles_to_show, int(oscillation_time))
         
-        print(f"Showing {cycles_to_show} cycles")
+    #     print(f"Showing {cycles_to_show} cycles")
 
 def test_func():
     s = Symbol("s")
