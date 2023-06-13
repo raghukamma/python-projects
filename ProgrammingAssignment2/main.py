@@ -9,27 +9,27 @@ def process_fs(s_domain_func, s_var, limits):
     print(limits)
 
     s_var = s_var
-    num, den = s_domain_func.as_numer_denom()  # Extract the numerator and denominator from the symbolic expression
+    num, den = s_domain_func.as_numer_denom()
 
     symbol_keys = list(limits.keys())
     symbol_limits = list(limits.values())
 
-    # Convert single numeric values to 1-item tuples
+    # ERROR CHECK: CONVERT SINGLE NUMERIC VALUES TO 1 ITEM TUPLE
     symbol_limits = [(value,) if isinstance(value, (int, float)) else value for value in symbol_limits]
 
-    # Check if all symbols in the expression (except 's') have corresponding keys in the limits dictionary
+    # ERROR CHECK: LIMITS DICT FULLY COVERS FREE VARIABLES IN THE "fs" EXPRESSION
     missing_symbols = [symbol for symbol in s_domain_func.free_symbols if str(symbol) not in symbol_keys and str(symbol) != str(s_var)]
     if missing_symbols:
         raise ValueError(f"ARE YOU SURE YOU INCLUDED LIMITS FOR THESE VARIABLES FROM TRANSFER FUNCTION IN THE LIMITS DICTIONARY: {missing_symbols}")
     
-    # Generate combinations of symbol values in the correct order
+    # GENERATE COMBINATIONS OF SUMBOL VALUES IN THE CORRECT ORDER
     combinations = list(itertools.product(*symbol_limits))
 
     for symbol_values in combinations:
         num_new = num
         den_new = den
 
-        # Substitute symbol values in numerator and denominator
+        # SUBSTITUTE SYMBOL CALUES IN THE NUM AND DEN
         for i, symbol_key in enumerate(symbol_keys):
             num_new = num_new.subs(Symbol(symbol_key), symbol_values[i])
             den_new = den_new.subs(Symbol(symbol_key), symbol_values[i])
@@ -37,24 +37,24 @@ def process_fs(s_domain_func, s_var, limits):
         generate_curve(num_new, den_new, s_var)
 
 def generate_curve(num, den, s_var):
-    tf = TransferFunction(num, den, s_var)     # Create the TransferFunction object
+    tf = TransferFunction(num, den, s_var)
     print(f"List of Poles in this Transfer function: {tf.poles()}")
     print(f"List of Zeros in this Transfer function: {tf.zeros()}")
-    bode_plot(tf, phase_unit='deg')     # Generate the bode plot
-    pole_zero_plot(tf, zero_color='red', show_axes=True)     # Generate the pole-zero plot    
+    bode_plot(tf, phase_unit='deg')
+    pole_zero_plot(tf, zero_color='red', show_axes=True)  
 
-    # Transform to time domain
+    # TRANSFORM TO TIME DOMAIN CODE BELOW
     t = Symbol('t', real=True)
     s = Symbol('s')
 
-    # convert the transfer function to expression
+    # CONVERT THE TRANSFER FUNCTION TO EXPRESSION
     expr = tf.to_expr()
 
-    #translate the transfer function to time domain
+    # TRANSLATE TO TIME DOMAIN
     time_domain_func = inverse_laplace_transform(expr, s, t)
     print(f"Time domain function: {time_domain_func}")
 
-    # Plot the time domain function when driven by a unit step function
+    # PLOT WHEN DRIVEN BY A UNIT STEP FUNCTION
     step_response_plot(tf)
 
     # Calculate the settled response time
