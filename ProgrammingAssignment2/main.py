@@ -1,4 +1,4 @@
-from sympy import Symbol, inverse_laplace_transform, exp
+from sympy import Symbol, inverse_laplace_transform, exp, Heaviside, symbols
 from sympy.physics.control.control_plots import pole_zero_plot, bode_magnitude_plot, bode_phase_plot, bode_plot, step_response_plot
 from sympy.physics.control.lti import TransferFunction
 import itertools
@@ -32,6 +32,11 @@ def process_fs(s_domain_func, s_var, limits):
                 symbol_keys.append(key)
                 break
 
+    # Check if all symbols in the expression (except 's') have corresponding keys in the limits dictionary
+    missing_symbols = [str(symbol) for symbol in symbols if str(symbol) not in symbol_keys and str(symbol) != str(s_var)]
+    if missing_symbols:
+        raise ValueError(f"ARE YOU SURE YOU INCLUDED THE VARIABLE {missing_symbols} FROM TRANSFER FUNCTION IN THE LIMITS DICTIONARY?")
+
     # Generate combinations of symbol values
     symbol_limits = []
     for key in symbol_keys:
@@ -57,7 +62,42 @@ def generate_curve(num, den, s_var):
     print(f"List of Poles in this Transfer function: {tf.poles()}")
     print(f"List of Zeros in this Transfer function: {tf.zeros()}")
     bode_plot(tf, phase_unit='deg')     # Generate the bode plot
-    pole_zero_plot(tf, zero_color='red', show_axes=True)     # Generate the pole-zero plot
+    pole_zero_plot(tf, zero_color='red', show_axes=True)     # Generate the pole-zero plot    
+
+    # Transform to time domain
+    t = Symbol('t', real=True)
+    s = Symbol('s')
+
+    # convert the transfer function to expression
+    expr = tf.to_expr()
+
+    #translate the transfer function to time domain
+    time_domain_func = inverse_laplace_transform(expr, s, t)
+    print(f"Time domain function: {time_domain_func}")
+
+    # Plot the time domain function when driven by a unit step function
+    step_response_plot(tf)
+
+    # Calculate the settled response time
+    settled_time = None
+    cycles_to_show = 5
+
+    if time_domain_func.poles():
+        settling_time = 4 / max(time_domain_func.poles().real)
+        if settling_time < float('inf'):    #checking if settling time is finite. if it does not have any poles or settling time is infinite, assign None.
+            settled_time = settling_time
+
+    if settled_time:
+        print(f"Settled response time: {settled_time} seconds")
+    else:
+        print("Response does not settle")
+
+        # Show 5 cycles of the lowest oscillation frequency
+        if time_domain_func.zeros():
+            oscillation_time = 2 * 3.14159 / min(time_domain_func.zeros().imag)
+            cycles_to_show = min(cycles_to_show, int(oscillation_time))
+        
+        print(f"Showing {cycles_to_show} cycles")
 
 def test_func():
     s = Symbol("s")
@@ -122,6 +162,10 @@ def test_func():
     # z3 = Symbol("z3")
     # sp = ((s + z1)*(s + z2)*(s + z3)) / ((s + p1)*(s + p2)*(s + p3))
     # limits = {"p1": (1e3,), "p2": (10e3,), "p3": (100e3,), "z1": (1e2, 1e4), "z2": (1e3, 1e5), "z3": (1e4, 1e6)}
+
+    # TEST: UNIT STEP RESPONSE
+    # sp = ((8*s**2 + 18*s + 32) / (s**3 + 6*s**2 + 14*s + 24))
+    # limits = {}
 
     process_fs(sp, s, limits)
 
