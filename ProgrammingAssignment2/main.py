@@ -125,19 +125,19 @@ def test_func():
     # sp = z1 / (s * p1 + p2)
     # limits = {"p1": 1e3, "p2": (10e3,), "z1":(40e3, 50e3)}
 
-    # TEST: '{symbol}' IN THE TRANSFER FUNCTION IS NOT FOUND IN THE LIMITS DICTIONARY (should raise VALUE error as defined)
+    # TEST: ERROR CHECK - '{symbol}' IN THE TRANSFER FUNCTION IS NOT FOUND IN THE LIMITS DICTIONARY (should raise VALUE error as defined)
     # p1 = Symbol("p1")
     # p2 = Symbol("p2")
     # z1 = Symbol("z1")
     # sp = z1 / (s * p1 + p2)
     # limits = {"p1": (1e3, 1.4e3, 2e3), "p2":(5e6, 7e6, 10e6), "z2":(40e3, 50e3, 60e3)} # "z1" is not defined in transfer function
 
-    # TEST: LIMITS ARE NOT IN THE CORRECT ORDER: THE LIMITS FOR 2-ITEM TUPLES OR 3-ITEM TUPLES SHOULD BE IN INCREASING ORDER (should raise VALUE error as defined)
-    p1 = Symbol("p1")
-    p2 = Symbol("p2")
-    z1 = Symbol("z1")
-    sp = z1 / (s * p1 + p2)
-    limits = {"p1": (1e3, 1.4e3, 2e3), "p2":(5e6, 7e6, 10e6), "z1":(40e3, 50e3, 60e3)} # limits are not in increasing order
+    # TEST: ERROR CHECK - LIMITS ARE NOT IN THE CORRECT ORDER: THE LIMITS FOR 2-ITEM TUPLES OR 3-ITEM TUPLES SHOULD BE IN INCREASING ORDER (should raise VALUE error as defined)
+    # p1 = Symbol("p1")
+    # p2 = Symbol("p2")
+    # z1 = Symbol("z1")
+    # sp = z1 / (s * p1 + p2)
+    # limits = {"p1": (1e3, 1.4e3, 2e3), "p2":(5e6, 7e6, 10e6), "z1":(40e3, 50e3, 60e3)} # limits are not in increasing order
 
     # TEST: single numeric value in limits dictionary
     # p1 = Symbol("p1")
@@ -145,14 +145,14 @@ def test_func():
     # limits = {"p1": 1e3}
 
     # TEST: 3 POLES, 3 ZEROS
-    # p1 = Symbol("p1")
-    # p2 = Symbol("p2")
-    # p3 = Symbol("p3")
-    # z1 = Symbol("z1")
-    # z2 = Symbol("z2")
-    # z3 = Symbol("z3")
-    # sp = ((s + z1)*(s + z2)*(s + z3)) / ((s + p1)*(s + p2)*(s + p3))
-    # limits = {"p1": (1e3,), "p2": (10e3,), "p3": (100e3,), "z1": (1e2, 1e4), "z2": (1e3, 1e5), "z3": (1e4, 1e6)}
+    p1 = Symbol("p1")
+    p2 = Symbol("p2")
+    p3 = Symbol("p3")
+    z1 = Symbol("z1")
+    z2 = Symbol("z2")
+    z3 = Symbol("z3")
+    sp = ((s + z1)*(s + z2)*(s + z3)) / ((s + p1)*(s + p2)*(s + p3))
+    limits = {"p1": (1e3,), "p2": (10e3,), "p3": (100e3,), "z1": (1e2, 1e4), "z2": (1e3, 1e5), "z3": (1e4, 1e6)}
 
     # TEST: UNIT STEP RESPONSE
     # sp = ((8*s**2 + 18*s + 32) / (s**3 + 6*s**2 + 14*s + 24))
