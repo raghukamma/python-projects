@@ -1,4 +1,4 @@
-from sympy import Symbol, inverse_laplace_transform, exp, Heaviside, symbols
+from sympy import Symbol, inverse_laplace_transform, exp, Heaviside
 from sympy.physics.control.control_plots import pole_zero_plot, bode_magnitude_plot, bode_phase_plot, bode_plot, step_response_plot
 from sympy.physics.control.lti import TransferFunction
 import itertools
@@ -21,6 +21,11 @@ def process_fs(s_domain_func, s_var, limits):
     missing_symbols = [symbol for symbol in s_domain_func.free_symbols if str(symbol) not in symbol_keys and str(symbol) != str(s_var)]
     if missing_symbols:
         raise ValueError(f"ARE YOU SURE YOU INCLUDED LIMITS FOR THESE VARIABLES FROM TRANSFER FUNCTION IN THE LIMITS DICTIONARY: {missing_symbols}")
+    
+    # ERROR CHECK: LIMITS ARE IN THE CORRECT ORDER: CHECK IF 2-ITEM TUPLES OR 3-ITEM TUPLES ARE IN INCREASING ORDER
+    for limits_tuple in symbol_limits:
+        if len(limits_tuple) in (2, 3) and limits_tuple != tuple(sorted(limits_tuple)):
+            raise ValueError("LIMITS ARE NOT IN THE CORRECT ORDER: THE LIMITS FOR 2-ITEM TUPLES OR 3-ITEM TUPLES SHOULD BE IN INCREASING ORDER.")
     
     # GENERATE COMBINATIONS OF SUMBOL VALUES IN THE CORRECT ORDER
     combinations = list(itertools.product(*symbol_limits))
@@ -82,10 +87,10 @@ def test_func():
     s = Symbol("s")
 
     #TEST: 1 POLE, 1 ZERO
-    p1 = Symbol("p1")
-    z1 = Symbol("z1")
-    sp = z1 / (s * p1)
-    limits = {"p1": (1e3, 1.4e3, 2e3), "z1":(40e3, 50e3, 60e3)}
+    # p1 = Symbol("p1")
+    # z1 = Symbol("z1")
+    # sp = z1 / (s * p1)
+    # limits = {"p1": (1e3, 1.4e3, 2e3), "z1":(40e3, 50e3, 60e3)}
 
     # TEST: LIMITS DICTIONARY HAS KEYS IN DIFFERENT ORDER
     # p1 = Symbol("p1")
@@ -126,6 +131,13 @@ def test_func():
     # z1 = Symbol("z1")
     # sp = z1 / (s * p1 + p2)
     # limits = {"p1": (1e3, 1.4e3, 2e3), "p2":(5e6, 7e6, 10e6), "z2":(40e3, 50e3, 60e3)} # "z1" is not defined in transfer function
+
+    # TEST: LIMITS ARE NOT IN THE CORRECT ORDER: THE LIMITS FOR 2-ITEM TUPLES OR 3-ITEM TUPLES SHOULD BE IN INCREASING ORDER (should raise VALUE error as defined)
+    p1 = Symbol("p1")
+    p2 = Symbol("p2")
+    z1 = Symbol("z1")
+    sp = z1 / (s * p1 + p2)
+    limits = {"p1": (1e3, 1.4e3, 2e3), "p2":(5e6, 7e6, 10e6), "z1":(40e3, 50e3, 60e3)} # limits are not in increasing order
 
     # TEST: single numeric value in limits dictionary
     # p1 = Symbol("p1")
